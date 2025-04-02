@@ -36,18 +36,18 @@
 --|					can be changed by the inputs
 --|					
 --|
---|                 xxx State Encoding key
+--|                 One-Hot State Encoding key
 --|                 --------------------
 --|                  State | Encoding
 --|                 --------------------
---|                  OFF   | 
---|                  ON    | 
---|                  R1    | 
---|                  R2    | 
---|                  R3    | 
---|                  L1    | 
---|                  L2    | 
---|                  L3    | 
+--|                  OFF   | 10000000
+--|                  ON    | 01000000
+--|                  R1    | 00100000
+--|                  R2    | 00010000
+--|                  R3    | 00001000
+--|                  L1    | 00000100
+--|                  L2    | 00000010
+--|                  L3    | 00000001
 --|                 --------------------
 --|
 --|
@@ -86,23 +86,106 @@ library ieee;
   use ieee.numeric_std.all;
  
 entity thunderbird_fsm is 
---  port(
-	
---  );
+  port(
+	   i_clk, i_reset : in std_logic;
+	   i_left, i_right : in std_logic;
+	   o_lights_L : out std_logic_vector(2 downto 0);
+	   o_lights_R : out std_logic_vector(2 downto 0)
+       );
 end thunderbird_fsm;
 
 architecture thunderbird_fsm_arch of thunderbird_fsm is 
 
 -- CONSTANTS ------------------------------------------------------------------
+    signal currstate, nextstate : std_logic_vector(7 downto 0) :="00000000";
+    
+    constant OFF : std_logic_vector(7 downto 0) := "10000000";
+    constant ONN : std_logic_vector(7 downto 0) := "01000000";
+    constant R1 : std_logic_vector(7 downto 0) := "00100000";
+    constant R2 : std_logic_vector(7 downto 0) := "00010000";
+    constant R3 : std_logic_vector(7 downto 0) := "00001000";
+    constant L1 : std_logic_vector(7 downto 0) := "00000100";
+    constant L2 : std_logic_vector(7 downto 0) := "00000010";
+    constant L3 : std_logic_vector(7 downto 0) := "00000001";
   
 begin
 
-	-- CONCURRENT STATEMENTS --------------------------------------------------------	
-	
-    ---------------------------------------------------------------------------------
+	-- CONCURRENT STATEMENTS --------------------------------------------------------
+	--Next state logic
+	process(currstate, i_left, i_right)     
+    begin
+       case currstate is
+            when OFF =>
+                if i_left='1' and i_right='0' then
+                    nextstate <= L1;
+                elsif i_right='1' and i_left='0' then
+                    nextstate <= R1;
+                elsif i_left='1' and i_right='1' then
+                    nextstate <= ONN;
+                else    
+                    nextstate <= OFF;
+                end if;
+             
+             when L1 =>
+                nextstate <= L2;
+             when L2 =>
+                nextstate <= L3;
+             when L3 =>
+                nextstate <= OFF;
+             
+             when R1 =>
+                nextstate <= R2;
+             when R2 =>
+                nextstate <= R3;
+             when R3 =>
+                nextstate <= OFF;
+             
+             when ONN =>
+                nextstate <= OFF;
+
+            when others =>
+                nextstate <= OFF;
+        end case;
+    end process;
+    
+    -- Output Logic
+    process(currstate)
+	begin
+	   case currstate is
+	       when OFF =>
+	           o_lights_L <= "000";
+	           o_lights_R <= "000";
+	       when ONN =>
+	           o_lights_L <= "111";
+	           o_lights_R <= "111";
+	       when L1 =>
+	           o_lights_L <= "001";
+	           o_lights_R <= "000";
+	       when L2 =>
+	           o_lights_L <= "010";
+	           o_lights_R <= "000";
+	       when L3 =>
+	           o_lights_L <= "100";
+	           o_lights_R <= "000";
+	       when R1 =>
+	       when others =>
+	           o_lights_L <= "000";
+	           o_lights_R <= "000";
+
+        end case;
+    end process;
 	
 	-- PROCESSES --------------------------------------------------------------------
-    
-	-----------------------------------------------------					   
+    register_proc : process (i_clk, i_reset)
+	begin
+	   if i_reset = '1' then
+	       currstate <= OFF;
+			
+		elsif (rising_edge(i_clk)) then
+			currstate <= nextstate;
+			
+			end if;
+	
+	end process register_proc;		   
 				  
 end thunderbird_fsm_arch;
