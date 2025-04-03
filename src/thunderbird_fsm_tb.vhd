@@ -74,7 +74,7 @@ architecture test_bench of thunderbird_fsm_tb is
 	signal w_lights_R : std_logic_vector(2 downto 0);
 	
 	-- constants
-	constant k_clk_period : time := 10ns;
+	constant k_clk_period : time := 10 ns;
 	
 begin
 	-- PORT MAPS ----------------------------------------
@@ -107,40 +107,42 @@ begin
 	   -- Reset
 	   w_reset <= '1';
 	   wait for k_clk_period;
-	   assert w_lights_L="000" and w_lights_R="000" report "Reset failed" severity failure;
+	   assert w_lights_L="000" and w_lights_R="000" report "Reset failed" severity failure; --when reset is on, all lights are off
 	   w_reset <= '0';
 	   wait for k_clk_period;
 	   
 	   -- Left turn sequence
 	   w_left <= '1';
 	   wait for k_clk_period;
-	   assert w_lights_L="001" report "L1 failed" severity failure;
+	   assert w_lights_L="001" report "L1 failed" severity failure; --when left is on and right is not, the first left light turns on
 	   wait for k_clk_period;
-	   assert w_lights_L="011" report "L2 failed" severity failure;
+	   assert w_lights_L="011" report "L2 failed" severity failure; --after the first light turns on, the second turns on
 	   wait for k_clk_period;
-	   assert w_lights_L="111" report "L3 failed" severity failure;
+	   assert w_lights_L="111" report "L3 failed" severity failure; --after the second turns on, the third turns on
 	   wait for k_clk_period;
-	   assert w_lights_L="000" report "Left turn reset failed" severity failure;
+	   assert w_lights_L="000" report "Left turn reset failed" severity failure; --after the third turns on, they all turn off
 	   
 	   -- Right turn sequence
 	   w_left <= '0';
 	   w_right <= '1';
 	   wait for k_clk_period;
-	   assert w_lights_R="001" report "R1 failed" severity failure;
+	   assert w_lights_R="001" report "R1 failed" severity failure; --when right is on and left is not, the first right light turns on
 	   wait for k_clk_period;
-	   assert w_lights_R="011" report "R2 failed" severity failure;
+	   assert w_lights_R="011" report "R2 failed" severity failure; --after the first light turns on, the second turns on
 	   wait for k_clk_period;
-	   assert w_lights_R="111" report "R3 failed" severity failure;
+	   assert w_lights_R="111" report "R3 failed" severity failure; --after the second turns, the third turns on
 	   wait for k_clk_period;
-	   assert w_lights_R="000" report "Right turn reset failed" severity failure;
+	   assert w_lights_R="000" report "Right turn reset failed" severity failure; --after the third turns on, they all turn off
 	   
 	   -- Hazard lights
 	   w_left <= '1';
 	   w_right <= '1';
 	   wait for k_clk_period;
-	   assert w_lights_L="111" and w_lights_R="111" report "Hazard lights failed" severity failure;
+	   assert w_lights_L="111" and w_lights_R="111" report "Hazard lights failed" severity failure; --when left and right are on, all lights turn on
 	   wait for k_clk_period;
-	   assert w_lights_L="000" and w_lights_R="000" report "Hazard lights reset failed" severity failure;
+	   assert w_lights_L="000" and w_lights_R="000" report "Hazard lights reset failed" severity failure; --after all lights turned on, they all turn off
+	   wait for k_clk_period;
+	   assert w_lights_L="111" and w_lights_R="111" report "Hazard lights failed" severity failure; --if left and right are still on, hazard lights blink
 	   
 	   wait;
     end process;
