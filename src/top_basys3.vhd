@@ -96,7 +96,7 @@ architecture top_basys3_arch of top_basys3 is
 	end component;
 	
 	component clock_divider is
-	   generic (constant k_DIV : natural := 25000000 );
+	   generic (constant k_DIV : natural := 12500000 );
 	   port( i_clk : in std_logic;
 	         i_reset : in std_logic;
 	         o_clk : out std_logic
@@ -123,7 +123,7 @@ begin
         );
 	
 	clk_div_inst : clock_divider
-	generic map (k_DIV => 25000000)
+	generic map (k_DIV => 12500000)
 	port map(
 	   i_clk => clk,
 	   i_reset => btnL,
