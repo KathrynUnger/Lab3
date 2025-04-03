@@ -8,6 +8,6 @@ Built for Vivado 2024.2 on Windows 11.
 
 --------------------------------------------------------------------------------------
 
-![Waveform from thunderbird_fsm_tb (1)](waveform1.png)
+![Waveform from thunderbird_fsm_tb (1)](Waveform1.png)
 
-![Waveform from thunderbird_fsm_tb (2)](waveform2.png)
+![Waveform from thunderbird_fsm_tb (2)](Waveform2.png)
